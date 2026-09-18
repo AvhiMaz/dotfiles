@@ -57,3 +57,8 @@ macos-titlebar-proxy-icon = hidden
 theme = Gruvbox Dark
 
 bell-features = no-attention
+
+# Cmd+Shift+H/L -> tmux prev/next window.
+# tmux has no Cmd modifier, so send prefix (C-k = \x0b) + H/L instead.
+keybind = super+shift+h=text:\x0bH
+keybind = super+shift+l=text:\x0bL
