@@ -123,20 +123,34 @@ return {
 
   {
     "nvim-treesitter/nvim-treesitter",
-    event = { "BufReadPost", "BufNewFile" },
-    cmd = { "TSInstall", "TSBufEnable", "TSBufDisable", "TSModuleInfo" },
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
-    opts = {
-      ensure_installed = {
-        "vim", "lua", "vimdoc",
+    config = function()
+      require("nvim-treesitter").setup {}
+
+      local langs = {
+        "vim", "lua", "vimdoc", "query",
         "html", "css",
         "rust", "toml",
         "json", "javascript", "typescript", "tsx",
         "markdown", "markdown_inline",
-        "c", "cpp",
-      },
-      highlight = { enable = true },
-    },
+        "c", "cpp", "bash", "yaml",
+      }
+      local installed = require("nvim-treesitter.config").get_installed "parsers"
+      local missing = vim.tbl_filter(function(lang)
+        return not vim.tbl_contains(installed, lang)
+      end, langs)
+      if #missing > 0 then
+        require("nvim-treesitter").install(missing)
+      end
+
+      vim.api.nvim_create_autocmd("FileType", {
+        callback = function(args)
+          pcall(vim.treesitter.start, args.buf)
+        end,
+      })
+    end,
   },
 
   {
@@ -207,12 +221,42 @@ return {
       { "<leader>e", "<cmd>Oil<cr>" },
     },
     config = function()
-      require("oil").setup {
+      local oil = require "oil"
+      oil.setup {
         default_file_explorer = true,
         view_options = { show_hidden = true },
         win_options = { signcolumn = "yes:2" },
+        preview_win = { update_on_cursor_moved = true, preview_method = "fast_scratch" },
       }
       require("oil-git-status").setup {}
+
+      local function auto_preview()
+        if vim.bo.filetype ~= "oil" or not vim.b.oil_ready then
+          return
+        end
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+          if vim.wo[win].previewwindow then
+            return
+          end
+        end
+        if oil.get_cursor_entry() then
+          oil.open_preview()
+        end
+      end
+
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "OilEnter",
+        callback = vim.schedule_wrap(function(args)
+          if vim.api.nvim_get_current_buf() == args.data.buf then
+            auto_preview()
+          end
+        end),
+      })
+
+      vim.api.nvim_create_autocmd("BufWinEnter", {
+        pattern = "oil://*",
+        callback = vim.schedule_wrap(auto_preview),
+      })
     end,
   },
 
@@ -296,7 +340,10 @@ return {
 
   {
     "tpope/vim-fugitive",
-    cmd = { "Git", "G", "Gdiffsplit", "Gread", "Gwrite", "Ggrep", "GMove", "GDelete", "GBrowse" },
+    cmd = {
+      "Git", "G", "Gdiffsplit", "Gvdiffsplit", "Ghdiffsplit", "Gedit", "Gsplit", "Gvsplit",
+      "Gread", "Gwrite", "Ggrep", "GMove", "GDelete", "GBrowse",
+    },
     keys = {
       { "<leader>gs", "<cmd>Git<cr>" },
       { "<leader>gc", "<cmd>Git commit<cr>" },
