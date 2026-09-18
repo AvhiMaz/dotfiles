@@ -4,6 +4,7 @@ o.number = true
 o.relativenumber = true
 o.cursorlineopt = "both"
 o.signcolumn = "yes:2"
+o.colorcolumn = "100"
 o.pumheight = 15
 o.completeopt = "menuone,noselect"
 
