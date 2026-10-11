@@ -34,6 +34,8 @@ o.autoread = true
 o.clipboard = "unnamedplus"
 o.guicursor = "a:block"
 
+vim.g.c_syntax_for_h = true
+
 if os.getenv "SSH_CONNECTION" then
   vim.g.clipboard = {
     name = "OSC 52",
