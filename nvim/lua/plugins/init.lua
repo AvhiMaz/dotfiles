@@ -352,4 +352,30 @@ return {
       { "<leader>gd", "<cmd>Gdiffsplit<cr>" },
     },
   },
+
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreview", "MarkdownPreviewStop", "MarkdownPreviewToggle" },
+    ft = { "markdown" },
+    build = "cd app && npm install",
+    init = function()
+      vim.g.mkdp_filetypes = { "markdown" }
+      vim.g.mkdp_port = "8090"
+      vim.g.mkdp_auto_close = 0
+      vim.g.mkdp_theme = "dark"
+      if vim.env.SSH_CONNECTION then
+        vim.g.mkdp_open_to_the_world = 1
+        vim.g.mkdp_open_ip = vim.split(vim.env.SSH_CONNECTION, " ")[3]
+        vim.cmd [[
+          function! MkdpPrintUrl(url)
+            echom "Markdown preview: " . a:url
+          endfunction
+        ]]
+        vim.g.mkdp_browserfunc = "MkdpPrintUrl"
+      end
+    end,
+    keys = {
+      { "<leader>mb", "<cmd>MarkdownPreviewToggle<cr>", ft = "markdown", desc = "Markdown preview in browser (toggle)" },
+    },
+  },
 }
