@@ -1,0 +1,66 @@
+name: check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+env:
+  TREE_SITTER: v0.27.1
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: shellcheck
+        run: shellcheck --severity=warning install.sh zsh/todo.sh
+
+      - name: zsh syntax
+        run: for f in zsh/zshrc zsh/darwin.zsh zsh/linux.zsh; do zsh -n "$f"; done
+
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: stable
+
+      - name: Install tools
+        run: |
+          if [ "$RUNNER_OS" = Linux ]; then
+            sudo apt-get update && sudo apt-get install -y tmux
+            asset=tree-sitter-linux-x64.gz
+          else
+            brew install tmux
+            asset=tree-sitter-macos-arm64.gz
+          fi
+          mkdir -p ~/.local/bin
+          curl -sSfL "https://github.com/tree-sitter/tree-sitter/releases/download/$TREE_SITTER/$asset" \
+            | gunzip > ~/.local/bin/tree-sitter
+          chmod +x ~/.local/bin/tree-sitter
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          ~/.local/bin/tree-sitter --version
+
+      - name: install.sh
+        run: ./install.sh
+
+      - name: tmux config
+        run: tmux -f /dev/null new-session -d 'sleep 10' \; source-file ~/.config/tmux/tmux.conf && tmux kill-server
+
+      - name: Install plugins
+        run: nvim --headless "+Lazy! restore" +qa
+
+      - name: Start neovim
+        run: nvim --headless -c "luafile .github/scripts/nvim-startup.lua" nvim/init.lua
