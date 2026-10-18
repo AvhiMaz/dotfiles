@@ -2,166 +2,242 @@
 
 Every binding in this repo that is not a vim or tmux default. Leader is `Space`.
 
+Every row names the plugin it comes from, so a search finds all of a plugin's
+keys at once: `harpoon`, `telescope`, `oil`, or a key like `<leader>f`. In
+nvim, `/telescope` in this file works the same way.
+
+Modes: `n` normal, `i` insert, `v` visual, `c` command line.
+
+- [Neovim](#neovim)
+  - [Core](#core) · [Diagnostics](#diagnostics) · [LSP](#lsp) · [Formatting](#formatting)
+  - [Telescope](#telescope) · [Harpoon](#harpoon) · [Oil](#oil) · [Undotree](#undotree)
+  - [Completion](#completion) · [Copilot](#copilot) · [Command line](#command-line)
+  - [Git](#git) · [Compile mode](#compile-mode) · [Markdown preview](#markdown-preview)
+  - [Start screen](#start-screen) · [Plugins without keys](#plugins-without-keys)
+- [tmux](#tmux) · [Ghostty](#ghostty) · [zsh](#zsh)
+
 ## Neovim
 
 ### Core
 
-| Key           | Does                                  |
-| ------------- | ------------------------------------- |
-| `;`           | Enter command mode, no shift needed   |
-| `jk`          | Escape, from insert                   |
-| `<C-h/j/k/l>` | Move to window left, down, up, right  |
-| `<C-\>`       | Jump to the compilation window        |
-| arrow keys    | Disabled in normal, insert and visual |
+Plain nvim, from `nvim/lua/mappings.lua`.
+
+| Key           | Mode    | Plugin | Does                                 |
+| ------------- | ------- | ------ | ------------------------------------ |
+| `;`           | n       | core   | Enter command mode, no shift needed  |
+| `jk`          | i       | core   | Escape                               |
+| `<C-h/j/k/l>` | n       | core   | Move to window left, down, up, right |
+| `<C-\>`       | n       | core   | Jump to the compilation window       |
+| arrow keys    | n, i, v | core   | Disabled                             |
 
 On macOS `<C-k>` is also the tmux prefix, so tmux eats it first. Press `<C-k>`
 twice to reach the nvim window-up mapping.
 
-### Files and search
+### Diagnostics
 
-Telescope, all under `<leader>f`.
+Built in, `vim.diagnostic`.
 
-| Key                         | Does                                          |
-| --------------------------- | --------------------------------------------- |
-| `<leader>ff`                | Find files in cwd                             |
-| `<leader>fF`                | Pick a directory first, then find files in it |
-| `<leader>fA`                | Find files anywhere, outside the project      |
-| `<leader>fw` / `<leader>fg` | Live grep                                     |
-| `<leader>fb`                | Buffers                                       |
-| `<leader>fh`                | Help tags                                     |
-| `<leader>fo`                | Recent files                                  |
-| `<leader>fy`                | Yank history, from neoclip                    |
+| Key          | Mode | Plugin     | Does                                   |
+| ------------ | ---- | ---------- | -------------------------------------- |
+| `[d` / `]d`  | n    | diagnostic | Previous, next diagnostic with a float |
+| `<leader>df` | n    | diagnostic | Show the diagnostic under the cursor   |
+| `<leader>dl` | n    | diagnostic | Send diagnostics to the location list  |
+| `<leader>dq` | n    | diagnostic | Send diagnostics to the quickfix list  |
+| `<leader>dt` | n    | telescope  | Browse diagnostics in Telescope        |
+
+### LSP
+
+nvim-lspconfig, and rustaceanvim for Rust with the same keys. Buffer-local,
+active once a server attaches.
+
+| Key          | Mode | Plugin  | Does                              |
+| ------------ | ---- | ------- | --------------------------------- |
+| `gd`         | n    | lsp     | Definition                        |
+| `gD`         | n    | lsp     | Declaration                       |
+| `gi`         | n    | lsp     | Implementation                    |
+| `gr`         | n    | lsp     | References                        |
+| `K`          | n    | lsp     | Hover docs                        |
+| `<C-k>`      | i    | lsp     | Signature help                    |
+| `<leader>ca` | n, v | lsp     | Code action                       |
+| `<leader>rn` | n    | lsp     | Rename symbol                     |
+| `<leader>lf` | n    | conform | Format with conform, LSP fallback |
+
+Language servers are installed by mason (`:Mason`).
+
+### Formatting
+
+conform.nvim formats on save, no keys besides `<leader>lf` above.
+
+### Telescope
+
+telescope.nvim, all under `<leader>f`.
+
+| Key          | Mode | Plugin    | Does                                          |
+| ------------ | ---- | --------- | --------------------------------------------- |
+| `<leader>ff` | n    | telescope | Find files in cwd                             |
+| `<leader>fF` | n    | telescope | Pick a directory first, then find files in it |
+| `<leader>fA` | n    | telescope | Find files anywhere, outside the project      |
+| `<leader>fw` | n    | telescope | Live grep                                     |
+| `<leader>fg` | n    | telescope | Live grep, same as `<leader>fw`               |
+| `<leader>fb` | n    | telescope | Buffers                                       |
+| `<leader>fh` | n    | telescope | Help tags                                     |
+| `<leader>fo` | n    | telescope | Recent files                                  |
+| `<leader>fy` | n    | neoclip   | Yank history                                  |
+| `<leader>dt` | n    | telescope | Diagnostics                                   |
 
 ### Harpoon
 
-| Key                        | Does                         |
-| -------------------------- | ---------------------------- |
-| `<leader>a`                | Add current file to the list |
-| `<C-e>`                    | Toggle tue quick menu        |
-| `<leader>1` .. `<leader>4` | Jump to slot 1 to 4          |
-| `<leader>hc`               | Clear the whole list         |
+harpoon, branch `harpoon2`.
+
+| Key                        | Mode | Plugin  | Does                         |
+| -------------------------- | ---- | ------- | ---------------------------- |
+| `<leader>a`                | n    | harpoon | Add current file to the list |
+| `<C-e>`                    | n    | harpoon | Toggle the quick menu        |
+| `<leader>1` .. `<leader>4` | n    | harpoon | Jump to slot 1 to 4          |
+| `<leader>hc`               | n    | harpoon | Clear the whole list         |
 
 In the quick menu it is a normal buffer: `dd` removes an entry, `ddp` reorders,
 then `:w` to save. `q` and `<Esc>` close without saving, so a deletion you did
 not write is discarded.
 
-### File explorer
+### Oil
 
-`<leader>e` opens oil in the current window. The preview opens on its own and
-follows the cursor.
+oil.nvim, the file explorer. `<leader>e` opens it in the current window. The
+preview opens on its own and follows the cursor.
 
-| Key                         | Does                                            |
-| --------------------------- | ----------------------------------------------- |
-| `<CR>`                      | Open the entry                                  |
-| `-`                         | Go to parent directory                          |
-| `_`                         | Open cwd                                        |
-| `` ` ``                     | `cd` to this directory                          |
-| `<C-s>` / `<C-h>` / `<C-t>` | Open in vertical split, horizontal split, tab   |
-| `<C-p>`                     | Toggle the preview                              |
-| `<C-l>`                     | Refresh                                         |
-| `<C-c>`                     | Close oil                                       |
-| `gs`                        | Change sort                                     |
-| `g.`                        | Toggle hidden files, already on by default here |
-| `gx`                        | Open with the system handler                    |
-| `g?`                        | Show all oil keymaps                            |
+| Key         | Mode | Plugin | Does                                            |
+| ----------- | ---- | ------ | ----------------------------------------------- |
+| `<leader>e` | n    | oil    | Open oil                                        |
+| `<CR>`      | n    | oil    | Open the entry                                  |
+| `-`         | n    | oil    | Go to parent directory                          |
+| `_`         | n    | oil    | Open cwd                                        |
+| `` ` ``     | n    | oil    | `cd` to this directory                          |
+| `<C-s>`     | n    | oil    | Open in a vertical split                        |
+| `<C-h>`     | n    | oil    | Open in a horizontal split                      |
+| `<C-t>`     | n    | oil    | Open in a tab                                   |
+| `<C-p>`     | n    | oil    | Toggle the preview                              |
+| `<C-l>`     | n    | oil    | Refresh                                         |
+| `<C-c>`     | n    | oil    | Close oil                                       |
+| `gs`        | n    | oil    | Change sort                                     |
+| `g.`        | n    | oil    | Toggle hidden files, already on by default here |
+| `gx`        | n    | oil    | Open with the system handler                    |
+| `g?`        | n    | oil    | Show all oil keymaps                            |
 
 Oil edits the filesystem through the buffer: rename a line, `dd` to delete, `p`
-to copy, then `:w` to apply. It asks for confirmation first.
+to copy, then `:w` to apply. It asks for confirmation first. oil-git-status
+shows each file's git status in the sign column.
 
-### LSP
+### Undotree
 
-Buffer-local, active once a server attaches.
-
-| Key          | Does                              |
-| ------------ | --------------------------------- |
-| `gd`         | Definition                        |
-| `gD`         | Declaration                       |
-| `gi`         | Implementation                    |
-| `gr`         | References                        |
-| `K`          | Hover docs                        |
-| `<C-k>`      | Signature help, insert mode       |
-| `<leader>ca` | Code action, normal and visual    |
-| `<leader>rn` | Rename symbol                     |
-| `<leader>lf` | Format with conform, LSP fallback |
-
-Rust goes through rustaceanvim, which attaches rust-analyzer with the same maps.
-Formatting also runs automatically on save through conform.
-
-### Diagnostics
-
-| Key          | Does                                   |
-| ------------ | -------------------------------------- |
-| `[d` / `]d`  | Previous, next diagnostic with a float |
-| `<leader>df` | Show the diagnostic under the cursor   |
-| `<leader>dl` | Send diagnostics to the location list  |
-| `<leader>dq` | Send diagnostics to the quickfix list  |
-| `<leader>dt` | Browse diagnostics in Telescope        |
+| Key         | Mode | Plugin   | Does                 |
+| ----------- | ---- | -------- | -------------------- |
+| `<leader>u` | n    | undotree | Toggle the undo tree |
 
 ### Completion
 
-nvim-cmp, insert mode.
+nvim-cmp, with LuaSnip for snippets.
 
-| Key                 | Does                                          |
-| ------------------- | --------------------------------------------- |
-| `<Tab>` / `<S-Tab>` | Next, previous item, also jumps snippet stops |
-| `<CR>`              | Confirm the selected item                     |
-| `<C-Space>`         | Trigger completion                            |
-| `<C-e>`             | Abort                                         |
+| Key         | Mode | Plugin | Does                                        |
+| ----------- | ---- | ------ | ------------------------------------------- |
+| `<Tab>`     | i    | cmp    | Next item, or jump to the next snippet stop |
+| `<S-Tab>`   | i    | cmp    | Previous item, or the previous snippet stop |
+| `<CR>`      | i    | cmp    | Confirm the selected item                   |
+| `<C-Space>` | i    | cmp    | Trigger completion                          |
+| `<C-e>`     | i    | cmp    | Abort                                       |
 
 The command line completes too: `:` history, and zsh history on `:!` lines.
-Wilder renders the `:`, `/` and `?` wildmenu with fuzzy matching.
 
 ### Copilot
 
-Insert mode, inline suggestions only, no panel.
+copilot.lua, inline suggestions only, no panel.
 
-| Key     | Does                  |
-| ------- | --------------------- |
-| `<C-l>` | Accept the suggestion |
-| `<C-g>` | Next suggestion       |
-| `<C-x>` | Dismiss               |
+| Key     | Mode | Plugin  | Does                  |
+| ------- | ---- | ------- | --------------------- |
+| `<C-l>` | i    | copilot | Accept the suggestion |
+| `<C-g>` | i    | copilot | Next suggestion       |
+| `<C-x>` | i    | copilot | Dismiss               |
 
 The lualine section shows yellow when the Copilot client is attached and grey
 when it is not.
 
+### Command line
+
+wilder.nvim renders the `:`, `/` and `?` wildmenu with fuzzy matching. No keys
+of its own: type, and `<Tab>` moves through the matches.
+
 ### Git
 
-| Key          | Does                              |
-| ------------ | --------------------------------- |
-| `<leader>gg` | LazyGit                           |
-| `<leader>gs` | Fugitive status                   |
-| `<leader>gc` | Commit                            |
-| `<leader>gp` | Push                              |
-| `<leader>gl` | Pull                              |
-| `<leader>gd` | Diff against the index in a split |
+| Key          | Mode | Plugin   | Does                              |
+| ------------ | ---- | -------- | --------------------------------- |
+| `<leader>gg` | n    | lazygit  | LazyGit                           |
+| `<leader>gs` | n    | fugitive | Status                            |
+| `<leader>gc` | n    | fugitive | Commit                            |
+| `<leader>gp` | n    | fugitive | Push                              |
+| `<leader>gl` | n    | fugitive | Pull                              |
+| `<leader>gd` | n    | fugitive | Diff against the index in a split |
 
-Gitsigns draws the signs in the gutter, no mappings. Oil shows git status per
-file in its own sign column. `:Octo` handles GitHub issues and pull requests.
+gitsigns draws the signs in the gutter, no keys. `:Octo` (octo.nvim) handles
+GitHub issues and pull requests.
 
 ### Compile mode
 
-| Key          | Does                                         |
-| ------------ | -------------------------------------------- |
-| `<leader>cc` | Compile, prompts for the command             |
-| `<leader>cr` | Recompile with the last command              |
-| `<leader>ch` | Command history                              |
-| `<C-\>`      | Jump to the compilation window from anywhere |
+compile-mode.nvim.
+
+| Key          | Mode | Plugin       | Does                                         |
+| ------------ | ---- | ------------ | -------------------------------------------- |
+| `<leader>cc` | n    | compile-mode | Compile, prompts for the command             |
+| `<leader>cr` | n    | compile-mode | Recompile with the last command              |
+| `<leader>ch` | n    | compile-mode | Command history                              |
+| `<C-\>`      | n    | compile-mode | Jump to the compilation window from anywhere |
 
 Inside the compilation buffer:
 
-| Key     | Does                                                       |
-| ------- | ---------------------------------------------------------- |
-| `<CR>`  | Jump to the error under the cursor, reusing an open window |
-| `<C-q>` | Send errors to the quickfix list and open it               |
-| `<C-\>` | Jump back to the code                                      |
-| `i`     | Send a line to the running program's stdin                 |
-| `<C-d>` | Send EOF to the running program                            |
+| Key     | Mode | Plugin       | Does                                                       |
+| ------- | ---- | ------------ | ---------------------------------------------------------- |
+| `<CR>`  | n    | compile-mode | Jump to the error under the cursor, reusing an open window |
+| `<C-q>` | n    | compile-mode | Send errors to the quickfix list and open it               |
+| `<C-\>` | n    | compile-mode | Jump back to the code                                      |
+| `i`     | n    | compile-mode | Send a line to the running program's stdin                 |
+| `<C-d>` | n    | compile-mode | Send EOF to the running program                            |
 
-### Misc
+### Markdown preview
 
-| Key         | Does     |
-| ----------- | -------- |
-| `<leader>u` | Undotree |
+markdown-preview.nvim, in Markdown buffers only.
+
+| Key          | Mode | Plugin           | Does                                   |
+| ------------ | ---- | ---------------- | -------------------------------------- |
+| `<leader>mb` | n    | markdown-preview | Toggle the live preview in the browser |
+
+The page updates as you type and follows the cursor, on port `8090`. Locally it
+opens the default browser. Over ssh it prints the URL instead: open it in the
+browser on the machine you are typing on.
+
+### Start screen
+
+snacks.nvim dashboard, shown when nvim starts without a file.
+
+| Key | Mode | Plugin | Does                     |
+| --- | ---- | ------ | ------------------------ |
+| `f` | n    | snacks | Find file                |
+| `r` | n    | snacks | Recent files             |
+| `g` | n    | snacks | Grep                     |
+| `e` | n    | snacks | Explorer (oil)           |
+| `c` | n    | snacks | Open the plugin config   |
+| `l` | n    | snacks | Lazy, the plugin manager |
+| `q` | n    | snacks | Quit                     |
+
+### Plugins without keys
+
+| Plugin          | Does                                                                          |
+| --------------- | ----------------------------------------------------------------------------- |
+| nvim-treesitter | Syntax highlighting. Parsers install on first start, `:TSUpdate` updates them |
+| gruvbox.nvim    | Colorscheme                                                                   |
+| lualine.nvim    | Status line                                                                   |
+| mason.nvim      | Installs language servers and formatters, `:Mason`                            |
+| gitsigns.nvim   | Git signs in the gutter                                                       |
+| wilder.nvim     | Fuzzy wildmenu on the command line                                            |
+| octo.nvim       | GitHub issues and pull requests, `:Octo`                                      |
+| lazy.nvim       | Plugin manager, `:Lazy`                                                       |
 
 ## tmux
 
@@ -170,29 +246,29 @@ reachable. Press the prefix twice to send it through to the inner program.
 
 ### Windows and panes
 
-| Key              | Does                                |
-| ---------------- | ----------------------------------- |
-| `M-h` / `M-l`    | Previous, next window, no prefix    |
-| prefix `H` / `L` | Previous, next window, repeatable   |
-| prefix `h/j/k/l` | Move to pane left, down, up, right  |
-| prefix `w`       | Window and pane tree                |
-| prefix `K`       | Session picker through sesh and fzf |
+| Key              | Plugin | Does                                |
+| ---------------- | ------ | ----------------------------------- |
+| `M-h` / `M-l`    | tmux   | Previous, next window, no prefix    |
+| prefix `H` / `L` | tmux   | Previous, next window, repeatable   |
+| prefix `h/j/k/l` | tmux   | Move to pane left, down, up, right  |
+| prefix `w`       | tmux   | Window and pane tree                |
+| prefix `K`       | sesh   | Session picker through sesh and fzf |
 
 ### Copy mode
 
 The mouse is off, so selection is keyboard only.
 
-| Key             | Does                                                          |
-| --------------- | ------------------------------------------------------------- |
-| `M-v`           | Enter copy mode, no prefix                                    |
-| prefix `v`      | Enter copy mode                                               |
-| `v`             | Start selection                                               |
-| `V`             | Select whole lines                                            |
-| `<C-v>`         | Toggle block selection                                        |
-| `y`             | Copy to the system clipboard and exit                         |
-| `/` `?` `n` `N` | Search the scrollback                                         |
-| `q` or `<Esc>`  | Leave without copying                                         |
-| `<C-y>`         | Copy the last tmux buffer to the clipboard, outside copy mode |
+| Key             | Plugin | Does                                                          |
+| --------------- | ------ | ------------------------------------------------------------- |
+| `M-v`           | tmux   | Enter copy mode, no prefix                                    |
+| prefix `v`      | tmux   | Enter copy mode                                               |
+| `v`             | tmux   | Start selection                                               |
+| `V`             | tmux   | Select whole lines                                            |
+| `<C-v>`         | tmux   | Toggle block selection                                        |
+| `y`             | tmux   | Copy to the system clipboard and exit                         |
+| `/` `?` `n` `N` | tmux   | Search the scrollback                                         |
+| `q` or `<Esc>`  | tmux   | Leave without copying                                         |
+| `<C-y>`         | tmux   | Copy the last tmux buffer to the clipboard, outside copy mode |
 
 `y` pipes to `pbcopy` on macOS and `xclip` on Linux. Over ssh, nvim yanks travel
 by OSC 52 instead.
@@ -210,16 +286,30 @@ tmux has no Cmd modifier, so these send the prefix followed by `H` or `L`.
 
 Vi mode is on, so `Esc` gives you normal mode at the prompt.
 
-| Key         | Does                      |
-| ----------- | ------------------------- |
-| `<C-Space>` | Accept the autosuggestion |
+| Key         | Does                              |
+| ----------- | --------------------------------- |
+| `<C-Space>` | Accept the autosuggestion         |
+| `Alt+→`     | Accept one word of it, macOS only |
 
-| Command     | Does                                                      |
-| ----------- | --------------------------------------------------------- |
-| `vf`        | fzf over files with a bat preview, opens the pick in nvim |
-| `cdf [dir]` | fzf over directories under `~/Dev`, cds into the pick     |
-| `td`        | Attach the `dev` tmux session, creating it if needed      |
-| `todo`      | Todo list                                                 |
+| Command          | Does                                                          |
+| ---------------- | ------------------------------------------------------------- |
+| `vf`             | fzf over files with a bat preview, opens the pick in nvim     |
+| `cdf [dir]`      | fzf over directories under `~/Dev`, cds into the pick         |
+| `td`             | Attach the `dev` tmux session, creating it with five windows  |
+| `tmux-dev`       | Attach the `personal` session in `~/Dev/personal`, macOS only |
+| `change-manager` | Switch the current project between npm, pnpm and bun          |
+
+`todo` is a small todo list in `~/.todos.txt`:
+
+| Command           | Short    | Does                   |
+| ----------------- | -------- | ---------------------- |
+| `todo add <task>` | `todo a` | Add a task             |
+| `todo list`       | `todo l` | Pending tasks          |
+| `todo all`        |          | Pending and completed  |
+| `todo done <n>`   | `todo d` | Mark task `n` as done  |
+| `todo remove <n>` | `todo r` | Remove task `n`        |
+| `todo clear`      | `todo c` | Remove completed tasks |
+| `todo stats`      | `todo s` | Counts                 |
 
 Aliases: `v` `vi` `vim` for nvim, `c` clear, `ll` for `ls -lah`, `g` git with
 `ga` `gc` `gp` `gi` `gcl`, `ni` `nrd` `nrb` `nrs` for npm, `pi` `prd` `prb`
