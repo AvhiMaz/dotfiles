@@ -64,3 +64,10 @@ jobs:
 
       - name: Start neovim
         run: nvim --headless -c "luafile .github/scripts/nvim-startup.lua" nvim/init.lua
+
+      - name: Parser load error
+        if: failure()
+        run: |
+          git clone -q --depth 1 https://github.com/tree-sitter-grammars/tree-sitter-lua /tmp/tree-sitter-lua
+          cd /tmp/tree-sitter-lua && tree-sitter build -o parser.so || true
+          python3 -c 'import ctypes, sys; ctypes.CDLL(sys.argv[1]); print("loads fine")' /tmp/tree-sitter-lua/parser.so
