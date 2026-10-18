@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400">
+<defs>
+  <radialGradient id="glow" cx="0.72" cy="0.5" r="0.6"><stop offset="0" stop-color="#fabd2f" stop-opacity="0.10"/><stop offset="1" stop-color="#fabd2f" stop-opacity="0"/></radialGradient>
+  <linearGradient id="title" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fabd2f"/><stop offset="1" stop-color="#fe8019"/></linearGradient>
+  <clipPath id="c"><rect width="1200" height="400" rx="16"/></clipPath>
+  <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity="0.55"/></filter>
+</defs>
+<g clip-path="url(#c)">
+  <rect width="1200" height="400" fill="#282828"/>
+  <rect width="1200" height="400" fill="url(#glow)"/>
+</g>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
+  <text x="48" y="150" fill="url(#title)" font-size="64" font-weight="700">dotfiles</text>
+  <text x="50" y="192" fill="#ebdbb2" font-size="19">one config,</text>
+  <text x="50" y="218" fill="#ebdbb2" font-size="19">macOS and Linux</text>
+  <rect x="50" y="248" width="76" height="26" rx="13" fill="none" stroke="#fabd2f"/>
+  <text x="88" y="266" fill="#fabd2f" font-size="13" text-anchor="middle">macOS</text>
+  <rect x="134" y="248" width="70" height="26" rx="13" fill="none" stroke="#83a598"/>
+  <text x="169" y="266" fill="#83a598" font-size="13" text-anchor="middle">Linux</text>
+  <text x="50" y="316" fill="#928374" font-size="13">nvim  tmux  zsh  ghostty</text>
+</g>
+<g filter="url(#shadow)">
+  <rect x="400" y="40" width="760" height="320" rx="12" fill="#1d2021" stroke="#3c3836"/>
+</g>
+<rect x="400" y="40" width="760" height="34" rx="12" fill="#3c3836"/><rect x="400" y="62" width="760" height="12" fill="#3c3836"/>
+<circle cx="420" cy="57" r="6" fill="#ff5f57"/><circle cx="440" cy="57" r="6" fill="#febc2e"/><circle cx="460" cy="57" r="6" fill="#28c840"/>
+<line x1="840" y1="74" x2="840" y2="320" stroke="#3c3836"/>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
+<text x="418" y="106" font-size="14" xml:space="preserve"><tspan fill="#665c54"> 1 </tspan><tspan fill="#fb4934">local</tspan><tspan fill="#ebdbb2"> map = vim.keymap.set</tspan></text>
+<text x="418" y="127" font-size="14" xml:space="preserve"><tspan fill="#665c54"> 2 </tspan></text>
+<text x="418" y="148" font-size="14" xml:space="preserve"><tspan fill="#665c54"> 3 </tspan><tspan fill="#ebdbb2">map(</tspan><tspan fill="#b8bb26">"n"</tspan><tspan fill="#ebdbb2">, </tspan><tspan fill="#b8bb26">";"</tspan><tspan fill="#ebdbb2">, </tspan><tspan fill="#b8bb26">":"</tspan><tspan fill="#ebdbb2">)</tspan></text>
+<text x="418" y="169" font-size="14" xml:space="preserve"><tspan fill="#665c54"> 4 </tspan><tspan fill="#ebdbb2">map(</tspan><tspan fill="#b8bb26">"i"</tspan><tspan fill="#ebdbb2">, </tspan><tspan fill="#b8bb26">"jk"</tspan><tspan fill="#ebdbb2">, </tspan><tspan fill="#b8bb26">"&lt;ESC&gt;"</tspan><tspan fill="#ebdbb2">)</tspan></text>
+<text x="418" y="190" font-size="14" xml:space="preserve"><tspan fill="#665c54"> 5 </tspan></text>
+<text x="418" y="211" font-size="14" xml:space="preserve"><tspan fill="#665c54"> 6 </tspan><tspan fill="#ebdbb2">{ </tspan><tspan fill="#b8bb26">"&lt;leader&gt;ff"</tspan><tspan fill="#ebdbb2">, </tspan><tspan fill="#b8bb26">"&lt;cmd&gt;Telescope</tspan><tspan fill="#ebdbb2"> ...</tspan></text>
+<text x="418" y="232" font-size="14" xml:space="preserve"><tspan fill="#665c54"> 7 </tspan><tspan fill="#ebdbb2">{ </tspan><tspan fill="#b8bb26">"&lt;leader&gt;gg"</tspan><tspan fill="#ebdbb2">, </tspan><tspan fill="#b8bb26">"&lt;cmd&gt;LazyGit&lt;cr&gt;"</tspan><tspan fill="#ebdbb2"> }</tspan></text>
+<text x="418" y="253" font-size="14" xml:space="preserve"><tspan fill="#665c54"> 8 </tspan><tspan fill="#ebdbb2">{ </tspan><tspan fill="#b8bb26">"&lt;leader&gt;mb"</tspan><tspan fill="#ebdbb2">, </tspan><tspan fill="#b8bb26">"&lt;cmd&gt;Markdown...</tspan><tspan fill="#ebdbb2"> }</tspan></text>
+<text x="418" y="274" font-size="14" xml:space="preserve"><tspan fill="#665c54"> 9 </tspan></text>
+<text x="418" y="295" font-size="14" xml:space="preserve"><tspan fill="#665c54">10 </tspan><tspan fill="#928374">-- gruvbox, everywhere</tspan></text>
+<text x="856" y="106" font-size="14" xml:space="preserve"><tspan fill="#b8bb26">~/Dev/dotfiles</tspan><tspan fill="#ebdbb2"> ❯ </tspan><tspan fill="#ebdbb2">./install.sh</tspan></text>
+<text x="856" y="127" font-size="14" xml:space="preserve"><tspan fill="#8ec07c">link</tspan><tspan fill="#a89984">  ~/.config/nvim</tspan></text>
+<text x="856" y="148" font-size="14" xml:space="preserve"><tspan fill="#8ec07c">link</tspan><tspan fill="#a89984">  ~/.config/tmux</tspan></text>
+<text x="856" y="169" font-size="14" xml:space="preserve"><tspan fill="#8ec07c">link</tspan><tspan fill="#a89984">  ~/.zshrc</tspan></text>
+<text x="856" y="190" font-size="14" xml:space="preserve"><tspan fill="#8ec07c">link</tspan><tspan fill="#a89984">  ~/.todo.sh</tspan></text>
+<text x="856" y="211" font-size="14" xml:space="preserve"><tspan fill="#8ec07c">link</tspan><tspan fill="#a89984">  ghostty/config</tspan></text>
+<text x="856" y="232" font-size="14" xml:space="preserve"></text>
+<text x="856" y="253" font-size="14" xml:space="preserve"><tspan fill="#ebdbb2">done (Darwin)</tspan></text>
+<text x="856" y="274" font-size="14" xml:space="preserve"><tspan fill="#b8bb26">~/Dev/dotfiles</tspan><tspan fill="#ebdbb2"> ❯ </tspan><tspan fill="#fabd2f">█</tspan></text>
+<rect x="401" y="320" width="758" height="39" fill="#1d2021"/>
+<rect x="412" y="326" width="68" height="22" rx="11" fill="#fabd2f"/><text x="421" y="342" font-size="14" xml:space="preserve"><tspan fill="#1d2021" font-weight="700"> avhi </tspan></text>
+<rect x="488" y="326" width="68" height="22" rx="11" fill="#504945"/><text x="497.4" y="342" font-size="14" xml:space="preserve"><tspan fill="#fabd2f" font-weight="700">1:nvim</tspan></text>
+<rect x="561" y="326" width="60" height="22" rx="11" fill="#3c3836"/><text x="569.8" y="342" font-size="14" xml:space="preserve"><tspan fill="#bdae93">2:zsh</tspan></text>
+<rect x="625" y="326" width="60" height="22" rx="11" fill="#3c3836"/><text x="633.8" y="342" font-size="14" xml:space="preserve"><tspan fill="#bdae93">3:git</tspan></text>
+<rect x="1088" y="326" width="60" height="22" rx="11" fill="#fabd2f"/><text x="1097.0" y="342" font-size="14" xml:space="preserve"><tspan fill="#1d2021" font-weight="700">10:42</tspan></text>
+<rect x="974" y="326" width="110" height="22" rx="11" fill="#3c3836"/><text x="982.6" y="342" font-size="14" xml:space="preserve"><tspan fill="#bdae93">208G / 494G</tspan></text>
+</g>
+</svg>

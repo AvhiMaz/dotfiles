@@ -51,4 +51,6 @@ esac
 
 echo
 echo "done ($OS)"
-[ -d "$BACKUP" ] && echo "backups in $BACKUP"
+if [ -d "$BACKUP" ]; then
+  echo "backups in $BACKUP"
+fi
