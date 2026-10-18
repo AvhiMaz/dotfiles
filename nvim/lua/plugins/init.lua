@@ -142,7 +142,7 @@ return {
         return not vim.tbl_contains(installed, lang)
       end, langs)
       if #missing > 0 then
-        require("nvim-treesitter").install(missing)
+        require("nvim-treesitter").install(missing, { max_jobs = 1 })
       end
 
       vim.api.nvim_create_autocmd("FileType", {
