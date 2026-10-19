@@ -151,7 +151,7 @@ function M.setup()
   vim.g.compile_mode = {
     recompile_no_fail = true,
     use_pseudo_terminal = true,
-    baleia_setup = true, -- decode ANSI color codes (clang/cargo) instead of showing raw [0m junk
+    ansi_color = { kind = "render" }, -- decode ANSI color codes (clang/cargo) instead of showing raw [0m junk
     environment = { MANPAGER = "col -b", PAGER = "col -b" },
   }
   load_history()
