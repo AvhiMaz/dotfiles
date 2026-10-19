@@ -226,22 +226,34 @@ return {
         default_file_explorer = true,
         view_options = { show_hidden = true },
         win_options = { signcolumn = "yes:2" },
-        preview_win = { update_on_cursor_moved = true, preview_method = "fast_scratch" },
+        preview_win = { update_on_cursor_moved = false, preview_method = "fast_scratch" },
       }
       require("oil-git-status").setup {}
 
+      local util = require "oil.util"
+      local opening
+
       local function auto_preview()
-        if vim.bo.filetype ~= "oil" or not vim.b.oil_ready then
+        if vim.bo.filetype ~= "oil" or not vim.b.oil_ready or util.is_visual_mode() then
           return
         end
-        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-          if vim.wo[win].previewwindow then
-            return
-          end
+        if opening and vim.uv.now() - opening < 1000 then
+          return
         end
-        if oil.get_cursor_entry() then
-          oil.open_preview()
+        local entry = oil.get_cursor_entry()
+        local dir = oil.get_current_dir()
+        if not entry or (dir and not vim.uv.fs_stat(dir .. entry.name)) then
+          return
         end
+        local preview = util.get_preview_win()
+        if preview and vim.w[preview].oil_entry_id == entry.id then
+          return
+        end
+        opening = vim.uv.now()
+        oil.open_preview(nil, function()
+          opening = nil
+          vim.schedule(auto_preview)
+        end)
       end
 
       vim.api.nvim_create_autocmd("User", {
@@ -256,6 +268,11 @@ return {
       vim.api.nvim_create_autocmd("BufWinEnter", {
         pattern = "oil://*",
         callback = vim.schedule_wrap(auto_preview),
+      })
+
+      vim.api.nvim_create_autocmd("CursorMoved", {
+        pattern = "oil://*",
+        callback = auto_preview,
       })
     end,
   },
