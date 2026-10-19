@@ -7,7 +7,7 @@ return {
         { icon = " ", key = "r", desc = "Recent", action = ":Telescope oldfiles" },
         { icon = " ", key = "g", desc = "Grep", action = ":Telescope live_grep" },
         { icon = " ", key = "e", desc = "Explorer", action = ":Oil" },
-        { icon = " ", key = "c", desc = "Config", action = ":e ~/dotfiles/nvim/lua/plugins/init.lua" },
+        { icon = " ", key = "c", desc = "Config", action = ":e " .. vim.fn.stdpath("config") .. "/lua/plugins/init.lua" },
         { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
         { icon = " ", key = "q", desc = "Quit", action = ":qa" },
       },
