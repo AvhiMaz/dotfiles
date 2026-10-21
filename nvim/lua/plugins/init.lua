@@ -7,8 +7,11 @@ return {
       return require "configs.snacks"
     end,
     keys = {
-      { "<C-/>", function() Snacks.terminal.toggle() end, mode = { "n", "t" } },
-      { "<C-_>", function() Snacks.terminal.toggle() end, mode = { "n", "t" } },
+      { "<C-/>", function() Snacks.terminal.toggle() end },
+      { "<C-_>", function() Snacks.terminal.toggle() end },
+      { "<C-/>", "<cmd>hide<cr>", mode = "t" },
+      { "<C-_>", "<cmd>hide<cr>", mode = "t" },
+      { "<leader>ft", function() require("configs.terminal-picker").pick() end },
     },
   },
 
