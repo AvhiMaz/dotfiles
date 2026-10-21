@@ -22,4 +22,16 @@ return {
   quickfile = { enabled = false },
   statuscolumn = { enabled = false },
   words = { enabled = false },
+  terminal = {
+    win = {
+      position = "float",
+      border = "rounded",
+      width = 0.85,
+      height = 0.8,
+      wo = {
+        winbar = "",
+        winhighlight = "Normal:Normal,NormalFloat:Normal,FloatBorder:GruvboxBg3",
+      },
+    },
+  },
 }
