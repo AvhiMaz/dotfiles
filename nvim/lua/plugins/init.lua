@@ -6,6 +6,10 @@ return {
     opts = function()
       return require "configs.snacks"
     end,
+    keys = {
+      { "<C-/>", function() Snacks.terminal.toggle() end, mode = { "n", "t" } },
+      { "<C-_>", function() Snacks.terminal.toggle() end, mode = { "n", "t" } },
+    },
   },
 
   {
