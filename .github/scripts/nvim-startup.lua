@@ -9,6 +9,40 @@ vim.notify = function(msg, level, ...)
 end
 
 local function check()
+  local langs = {
+    "vim", "lua", "vimdoc", "query",
+    "html", "css",
+    "rust", "toml",
+    "json", "javascript", "typescript", "tsx",
+    "markdown", "markdown_inline",
+    "c", "cpp", "bash", "yaml",
+  }
+  for _, lang in ipairs(langs) do
+    local ok, added = pcall(vim.treesitter.language.add, lang)
+    if not ok or not added then
+      errors[#errors + 1] = "parser does not load: " .. lang
+    elseif not vim.treesitter.query.get(lang, "highlights") then
+      errors[#errors + 1] = "no highlight query: " .. lang
+    end
+  end
+
+  for ext, body in pairs { lua = "local x = 1\n", md = "# title\n\ntext\n" } do
+    local path = vim.fn.tempname() .. "." .. ext
+    vim.fn.writefile(vim.split(body, "\n"), path)
+    vim.cmd.edit(path)
+    local buf = vim.api.nvim_get_current_buf()
+    if not vim.treesitter.highlighter.active[buf] then
+      errors[#errors + 1] = "no treesitter highlighting in a ." .. ext .. " file"
+    end
+  end
+
+  vim.cmd "checkhealth lazy"
+  for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, -1, false)) do
+    if line:match "ERROR" then
+      errors[#errors + 1] = "checkhealth lazy: " .. vim.trim(line)
+    end
+  end
+
   if vim.v.errmsg ~= "" then
     errors[#errors + 1] = "errmsg: " .. vim.v.errmsg
   end

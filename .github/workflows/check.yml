@@ -4,13 +4,26 @@ on:
   push:
     branches: [master]
   pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   TREE_SITTER: v0.27.1
+  TERM: xterm-256color
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   lint:
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -24,50 +37,146 @@ jobs:
         run: for f in zsh/zshrc zsh/darwin.zsh zsh/linux.zsh; do zsh -n "$f"; done
 
   install:
+    name: install (${{ matrix.name }})
+    needs: lint
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15]
+        include:
+          - name: arch
+            os: ubuntu-24.04
+            container: archlinux:latest
+            prefix: C-s
+          - name: debian
+            os: ubuntu-24.04
+            container: debian:trixie
+            prefix: C-s
+          - name: macos
+            os: macos-15
+            prefix: C-k
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
+    timeout-minutes: 40
     steps:
+      - name: Bootstrap arch
+        if: matrix.name == 'arch'
+        run: pacman -Syu --noconfirm --needed git
+
+      - name: Bootstrap debian
+        if: matrix.name == 'debian'
+        run: apt-get update && apt-get install -y git ca-certificates
+
       - uses: actions/checkout@v4
 
-      - uses: rhysd/action-setup-vim@v1
-        with:
-          neovim: true
-          version: stable
+      - name: Trust workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
-      - name: Install tools
+      - name: Install tools (arch)
+        if: matrix.name == 'arch'
         run: |
-          if [ "$RUNNER_OS" = Linux ]; then
-            sudo apt-get update && sudo apt-get install -y tmux
-            asset=tree-sitter-linux-x64.gz
-          else
-            brew install tmux
-            asset=tree-sitter-macos-arm64.gz
-          fi
+          pacman -S --noconfirm --needed base-devel curl unzip neovim tmux zsh fzf \
+            ripgrep fd starship zoxide tree-sitter-cli nodejs npm
+
+      - name: Install tools (debian)
+        if: matrix.name == 'debian'
+        run: |
+          apt-get install -y build-essential curl unzip xz-utils zsh tmux fzf \
+            ripgrep fd-find zoxide nodejs npm
           mkdir -p ~/.local/bin
-          curl -sSfL "https://github.com/tree-sitter/tree-sitter/releases/download/$TREE_SITTER/$asset" \
+          ln -sf "$(command -v fdfind)" ~/.local/bin/fd
+          curl -sSfL https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz \
+            | tar -xz -C /opt
+          ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim
+          curl -sSfL "https://github.com/tree-sitter/tree-sitter/releases/download/$TREE_SITTER/tree-sitter-linux-x64.gz" \
+            | gunzip > ~/.local/bin/tree-sitter
+          chmod +x ~/.local/bin/tree-sitter
+          curl -sSf https://starship.rs/install.sh | sh -s -- -y -b ~/.local/bin
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install tools (macos)
+        if: matrix.name == 'macos'
+        run: |
+          brew install neovim tmux fzf ripgrep fd starship zoxide
+          mkdir -p ~/.local/bin
+          curl -sSfL "https://github.com/tree-sitter/tree-sitter/releases/download/$TREE_SITTER/tree-sitter-macos-arm64.gz" \
             | gunzip > ~/.local/bin/tree-sitter
           chmod +x ~/.local/bin/tree-sitter
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          ~/.local/bin/tree-sitter --version
+
+      - name: Versions
+        run: |
+          nvim --version | head -1
+          tmux -V
+          zsh --version
+          tree-sitter --version
+
+      - name: oh-my-zsh, zsh plugins, tpm
+        run: |
+          sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+          custom=~/.oh-my-zsh/custom/plugins
+          git clone -q --depth 1 https://github.com/zsh-users/zsh-autosuggestions "$custom/zsh-autosuggestions"
+          git clone -q --depth 1 https://github.com/zsh-users/zsh-syntax-highlighting "$custom/zsh-syntax-highlighting"
+          git clone -q --depth 1 https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
       - name: install.sh
-        run: ./install.sh
+        run: |
+          ./install.sh | tee first.log
+          grep -q "^moved $HOME/.zshrc" first.log || { echo "existing .zshrc was not backed up"; exit 1; }
+          ls ~/.dotfiles-backup/*/.zshrc
+
+          ./install.sh | tee second.log
+          if grep -E '^(link|moved|rm) ' second.log; then
+            echo "second run changed something, install.sh is not idempotent"
+            exit 1
+          fi
+
+          for pair in nvim:.config/nvim tmux:.config/tmux zsh/zshrc:.zshrc zsh/todo.sh:.todo.sh; do
+            src="$GITHUB_WORKSPACE/${pair%%:*}"
+            dst="$HOME/${pair#*:}"
+            [ "$(readlink "$dst")" = "$src" ] || { echo "$dst does not point to $src"; exit 1; }
+          done
+
+      - name: zsh starts
+        run: |
+          out=$(zsh -i -c 'echo ZSH_OK' 2> zsh.err) || { cat zsh.err; exit 1; }
+          cat zsh.err
+          grep -q ZSH_OK <<< "$out" || { echo "interactive zsh did not finish"; exit 1; }
+          if grep -Ei 'command not found|no such file|parse error|bad pattern|unknown file attribute' zsh.err; then
+            echo "zshrc printed errors"
+            exit 1
+          fi
 
       - name: tmux config
-        run: tmux -f /dev/null new-session -d 'sleep 10' \; source-file ~/.config/tmux/tmux.conf && tmux kill-server
+        run: |
+          tmux -f /dev/null new-session -d -s ci 'sleep 300'
+          tmux source-file ~/.config/tmux/tmux.conf
 
-      - name: Install plugins
-        run: nvim --headless "+Lazy! restore" +qa
+          [ "$(tmux show -gv prefix)" = "${{ matrix.prefix }}" ] || { echo "prefix is $(tmux show -gv prefix)"; exit 1; }
+
+          for k in w v K p H L h j k l; do
+            tmux list-keys -T prefix "$k" | grep -q . || { echo "missing prefix $k"; exit 1; }
+          done
+          for k in M-v M-h M-l M-1 M-5; do
+            tmux list-keys -T root "$k" | grep -q . || { echo "missing $k"; exit 1; }
+          done
+
+          ~/.tmux/plugins/tpm/bin/install_plugins
+          test -d ~/.tmux/plugins/tmux-fzf || { echo "tpm did not install tmux-fzf"; exit 1; }
+          tmux kill-server
+
+      - name: Install plugins from the lock file
+        run: |
+          nvim --headless "+Lazy! restore" +qa
+          git diff --exit-code nvim/lazy-lock.json
 
       - name: Start neovim
-        run: nvim --headless -c "luafile .github/scripts/nvim-startup.lua" nvim/init.lua
+        run: |
+          nvim --headless -c "luafile .github/scripts/nvim-startup.lua" nvim/init.lua
+          git diff --exit-code nvim/lazy-lock.json
 
       - name: Parser load error
         if: failure()
         run: |
           git clone -q --depth 1 https://github.com/tree-sitter-grammars/tree-sitter-lua /tmp/tree-sitter-lua
           cd /tmp/tree-sitter-lua && tree-sitter build -o parser.so || true
-          python3 -c 'import ctypes, sys; ctypes.CDLL(sys.argv[1]); print("loads fine")' /tmp/tree-sitter-lua/parser.so
+          python3 -c 'import ctypes, sys; ctypes.CDLL(sys.argv[1]); print("loads fine")' /tmp/tree-sitter-lua/parser.so || true
