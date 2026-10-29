@@ -2,6 +2,7 @@ return {
   defaults = { lazy = true },
   install = { colorscheme = { "gruvbox" } },
   checker = { enabled = true, notify = false },
+  rocks = { enabled = false },
 
   ui = {
     icons = {
