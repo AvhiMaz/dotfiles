@@ -76,6 +76,31 @@ as you type and follows the cursor. Locally it opens the default browser on
 the URL to open on yours; while it runs, anyone on that machine's network can
 open the page too.
 
+## Claude Code in tmux
+
+Claude Code sessions are managed with [crmux](https://github.com/AvhiMaz/crmux),
+my fork of [maedana/crmux](https://github.com/maedana/crmux), a tmux sidebar
+that shows each session's status and output. Upstream is in maintenance mode,
+so the fork carries a few changes:
+
+- `b` hides the session list so the preview gets the full width.
+- The selected session's window is resized to the preview, so Claude wraps its
+  own output instead of being cut off. It goes back to full size when you
+  switch to it, leave crmux, or quit.
+- `y` jumps to the selected session in tmux copy mode and returns to crmux when
+  you finish copying.
+- Scroll mode reaches the whole history, not just three screens.
+
+```sh
+cargo install --git https://github.com/AvhiMaz/crmux --locked
+```
+
+Run `crmux` in its own window. Sessions can live in a separate background
+tmux session, which keeps their windows off the status bar while crmux still
+sees them. In crmux, prefix `v` and `M-v` send `C-u` to start
+its scroll mode instead of tmux copy mode. The crmux keys are in
+[CHEATSHEET.md](CHEATSHEET.md).
+
 ## Platform differences
 
 <p align="center">
@@ -106,6 +131,10 @@ serve clipboard reads to remote programs, so paste from the local machine is
 
 Everything else is identical on both.
 
+The Linux machine is a headless Arch box I reach over SSH and Tailscale. The
+install, from boot media to remote access, is written up in
+[headless-arch](https://github.com/AvhiMaz/headless-arch).
+
 ## CI
 
 [`check.yml`](.github/workflows/check.yml) runs on every push to `master` and
@@ -119,11 +148,26 @@ on pull requests:
 
 ## Requirements
 
-neovim 0.12+, tmux 3.4+, zsh with oh-my-zsh, starship, zoxide, fzf, bat,
-ripgrep, fd, and a Nerd Font. The treesitter parsers need `tree-sitter-cli`
-0.26.1+ from your package manager, not npm, and a C compiler.
+neovim 0.12+, tmux 3.4+, zsh with oh-my-zsh, starship, zoxide, fzf, sesh,
+bat, ripgrep, fd, and a Nerd Font. The treesitter parsers need
+`tree-sitter-cli` 0.26.1+ from your package manager, not npm, and a C compiler.
+crmux needs a Rust toolchain for `cargo install`.
 
-On Linux `fd` is packaged as `fdfind`, so symlink it:
+zshrc loads two oh-my-zsh plugins that do not ship with it:
+
+```sh
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+```
+
+tmux plugins go through tpm, which `install.sh` does not install. Clone it,
+then press prefix `I` inside tmux to install the plugins:
+
+```sh
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+```
+
+On Debian and Ubuntu `fd` is packaged as `fdfind`, so symlink it:
 
 ```sh
 mkdir -p ~/.local/bin && ln -sf "$(command -v fdfind)" ~/.local/bin/fd
@@ -131,11 +175,15 @@ mkdir -p ~/.local/bin && ln -sf "$(command -v fdfind)" ~/.local/bin/fd
 
 tmux draws `_` instead of icons unless the locale name contains `UTF-8`. It
 string-matches the name, so `en_IN` fails even though its charmap is UTF-8.
-`zsh/linux.zsh` sets `LANG=en_IN.UTF-8`; for everything outside the shell:
+`zsh/linux.zsh` sets `LANG=en_IN.UTF-8`; for everything outside the shell,
+on Arch, after uncommenting `en_IN.UTF-8 UTF-8` in `/etc/locale.gen`:
 
 ```sh
-sudo update-locale LANG=en_IN.UTF-8
+sudo locale-gen
+sudo localectl set-locale LANG=en_IN.UTF-8
 ```
+
+On Debian and Ubuntu it is `sudo update-locale LANG=en_IN.UTF-8`.
 
 ## License
 

@@ -251,7 +251,9 @@ reachable. Press the prefix twice to send it through to the inner program.
 | `M-h` / `M-l`    | tmux   | Previous, next window, no prefix    |
 | prefix `H` / `L` | tmux   | Previous, next window, repeatable   |
 | prefix `h/j/k/l` | tmux   | Move to pane left, down, up, right  |
-| prefix `w`       | tmux   | Window and pane tree                |
+| prefix `w`       | fzf    | Pick any window across sessions     |
+| prefix `p`       | tmux   | Previous window                     |
+| `M-1` to `M-5`   | tmux   | Jump to window 1 to 5, no prefix    |
 | prefix `K`       | sesh   | Session picker through sesh and fzf |
 
 ### Copy mode
@@ -260,8 +262,8 @@ The mouse is off, so selection is keyboard only.
 
 | Key             | Plugin | Does                                                          |
 | --------------- | ------ | ------------------------------------------------------------- |
-| `M-v`           | tmux   | Enter copy mode, no prefix                                    |
-| prefix `v`      | tmux   | Enter copy mode                                               |
+| `M-v`           | tmux   | Enter copy mode, no prefix (crmux scroll mode inside crmux)   |
+| prefix `v`      | tmux   | Enter copy mode (crmux scroll mode inside crmux)              |
 | `v`             | tmux   | Start selection                                               |
 | `V`             | tmux   | Select whole lines                                            |
 | `<C-v>`         | tmux   | Toggle block selection                                        |
@@ -272,6 +274,24 @@ The mouse is off, so selection is keyboard only.
 
 `y` pipes to `pbcopy` on macOS and `xclip` on Linux. Over ssh, nvim yanks travel
 by OSC 52 instead.
+
+### crmux
+
+Sidebar for Claude Code sessions, from [my fork](https://github.com/AvhiMaz/crmux).
+
+| Key                       | Plugin | Does                                                  |
+| ------------------------- | ------ | ----------------------------------------------------- |
+| `j` / `k`                 | crmux  | Next, previous session                                |
+| `1` to `9`                | crmux  | Select session by number                              |
+| `t`                       | crmux  | Back to the previously selected session               |
+| `i`                       | crmux  | Type into the selected session, `<Esc>` to stop       |
+| `s`                       | crmux  | Switch to the session's real window                   |
+| `y`                       | crmux  | Copy mode in the session, back to crmux when done     |
+| `<C-u>`                   | crmux  | Scroll mode: `j/k`, `<C-u>/<C-d>`, `gg`, `G`, `<Esc>` |
+| `b`                       | crmux  | Hide or show the session list                         |
+| `v`                       | crmux  | Cycle preview layout                                  |
+| `e`                       | crmux  | Set a title for the session                           |
+| `?` / `q`                 | crmux  | Help, quit                                            |
 
 ## Ghostty
 
