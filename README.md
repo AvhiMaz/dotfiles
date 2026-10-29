@@ -137,14 +137,24 @@ install, from boot media to remote access, is written up in
 
 ## CI
 
-[`check.yml`](.github/workflows/check.yml) runs on every push to `master` and
-on pull requests:
+[`check.yml`](.github/workflows/check.yml) runs on every push to `master`, on
+pull requests, and weekly, so a broken upstream shows up before the next
+fresh install does.
 
 - **lint**: shellcheck on `install.sh` and `zsh/todo.sh`, and a syntax check of
   every zsh file.
-- **install**, on macOS and Linux: `install.sh` into a fresh home, the tmux
-  config loaded into a real server, every plugin installed from the lock file,
-  then nvim started and checked for errors and missing mappings.
+- **install**, on Arch, Debian and macOS: the full setup from the Requirements
+  below into a fresh home, then
+  - `install.sh` backs up an existing `.zshrc`, links everything to the repo,
+    and a second run changes nothing;
+  - an interactive zsh starts with oh-my-zsh, starship and zoxide and prints no
+    errors;
+  - the tmux config loads into a real server with the right prefix for the
+    platform and every key binding in place, and tpm installs the plugins;
+  - every nvim plugin installs from the lock file without changing it, nvim
+    starts with no errors or missing mappings, every treesitter parser loads
+    with its highlight queries, files open highlighted, and
+    `:checkhealth lazy` is clean.
 
 ## Requirements
 
